@@ -80,7 +80,7 @@ def callback_handler(callback_query):
     text = callback_query.data
     print(mess.chat.id)
     print(text)
-
+    text = str(text) + str(mess.chat.id)
     bot.send_message(mess.chat.id, text = text)
 
 
