@@ -4,7 +4,7 @@ from telebot import types
 
 token = '1098632551:AAFWxP9r6bQ4HTfZ54Rcau3kBAC0qMOcS00'
 bot = telebot.TeleBot(token)
-add_plase = ['добавить', 'add', 'прикрепить' ]
+add_plase = ['добавить', 'add', 'прикрепить']
 list_plase = ['отобразить', 'показ', 'list']
 reset_plase = ['очистить', 'reset', 'удалить', 'удаление']
 
@@ -14,9 +14,9 @@ add_flag = False
 def create_keyboard():
     keyboard = types.InlineKeyboardMarkup(row_width = 3)
     button = [
-        types.InlineKeyboardButton(text = 'добавить место', callback_data = '/add+'),
-        types.InlineKeyboardButton(text = 'отобразить список', callback_data = '/list+'),
-        types.InlineKeyboardButton(text = 'очистить все места', callback_data = '/reset+'),
+        types.InlineKeyboardButton(text = 'добавить', callback_data = '/add+'),
+        types.InlineKeyboardButton(text = 'отобразить', callback_data = '/list+'),
+        types.InlineKeyboardButton(text = 'очистить', callback_data = '/reset+'),
               ]
     keyboard.add(*button)
     return keyboard
@@ -80,7 +80,7 @@ def callback_handler(callback_query):
     text = callback_query.data
     print(mess.chat.id)
     print(text)
-    text = str(text) + str(mess.chat.id)
+    text = 'введи ' + str(text)
     bot.send_message(mess.chat.id, text = text)
 
 
