@@ -1,5 +1,6 @@
 import telebot
 from telebot import types
+from collections import defaultdict
 
 
 token = '1098632551:AAFWxP9r6bQ4HTfZ54Rcau3kBAC0qMOcS00'
@@ -7,16 +8,22 @@ bot = telebot.TeleBot(token)
 add_plase = ['добавить', 'add', 'прикрепить']
 list_plase = ['отобразить', 'показ', 'list']
 reset_plase = ['очистить', 'reset', 'удалить', 'удаление']
+START, LOCKEYSHN, PICTCHE, CONFIRM = range(4)
+USER_STATE = defaultdict(lambda: START)
 
-add_flag = False
 
+def get_state(message):
+    return USER_STATE[message.chat.id]
+
+def set_state(message, state):
+    USER_STATE[message.chat.id] = state
 
 def create_keyboard():
     keyboard = types.InlineKeyboardMarkup(row_width = 3)
     button = [
-        types.InlineKeyboardButton(text = 'добавить', callback_data = '/add+'),
-        types.InlineKeyboardButton(text = 'отобразить', callback_data = '/list+'),
-        types.InlineKeyboardButton(text = 'очистить', callback_data = '/reset+'),
+        types.InlineKeyboardButton(text = 'добавить', callback_data = '/add'),
+        types.InlineKeyboardButton(text = 'отобразить', callback_data = '/list'),
+        types.InlineKeyboardButton(text = 'очистить', callback_data = '/reset'),
               ]
     keyboard.add(*button)
     return keyboard
@@ -46,13 +53,6 @@ def check_reset(message):
     return False
 
 
-@bot.message_handler(commands = ['add'])
-@bot.message_handler(func = check_add)
-def handle_message(message):
-    print(message.text)
-    bot.send_message(chat_id = message.chat.id, text = "Добавление места в память. Загрузи локацию!")
-
-
 
 @bot.message_handler(commands = ['list'])
 @bot.message_handler(func = check_list)
@@ -66,7 +66,15 @@ def handle_message(message):
     print(message.text)
     bot.send_message(chat_id = message.chat.id, text = "Удаление всей информации")
 
-@bot.message_handler()
+@bot.message_handler(commands = ['add'])
+@bot.message_handler(func = check_add)
+def handle_message(message):
+    print(message.text)
+    set_state(message, LOCKEYSHN)
+    bot.send_message(chat_id = message.chat.id, text = "Добавление места в память. Загрузи локацию!")
+
+
+@bot.message_handler(func = lambda message: get_state(message) == START)
 def handle_message(message):
     print(message.text)
     keyboard = create_keyboard()
@@ -74,18 +82,25 @@ def handle_message(message):
                      text = "Что нужно сделать",
                      reply_markup =keyboard)
 
+
 @bot.callback_query_handler(func = lambda x:True)
 def callback_handler(callback_query):
     mess = callback_query.message
     text = callback_query.data
     print(mess.chat.id)
     print(text)
-    text = 'введи ' + str(text)
+    text = 'введи: ' + str(text)
     bot.send_message(mess.chat.id, text = text)
 
+@bot.message_handler(content_types= ["photo"])
+def verifyUser(message):
+    print ("Got photo")
+    percent = message.photo
+    bot.send_message(message.chat.id, percent)
 
 
 
+@bot.message_handler(func = lambda message: get_state(message) == LOCKEYSHN)
 @bot.message_handler(content_types = 'location')
 def handle_message(message):
     print(message.location)
@@ -94,6 +109,7 @@ def handle_message(message):
     a['latitude'] = message.location.latitude
     bot.send_message(chat_id = message.chat.id, text = (str(a['longitude'])+ str(a['latitude'])))
     bot.send_location(message.chat.id, a['longitude'], a['latitude'] )
+
 
 
 if __name__ == '__main__':
