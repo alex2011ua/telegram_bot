@@ -7,7 +7,7 @@ bot = telebot.TeleBot(token)
 add_plase = ['добавить', 'add', 'прикрепить' ]
 list_plase = ['отобразить', 'показ', 'list']
 reset_plase = ['очистить', 'reset', 'удалить', 'удаление']
-ver = 2
+
 add_flag = False
 
 
