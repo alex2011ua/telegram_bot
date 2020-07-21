@@ -96,6 +96,6 @@ def handle_message(message):
     bot.send_location(message.chat.id, a['longitude'], a['latitude'] )
 
 
-
-bot.polling()
+if __name__ == '__main__':
+    bot.polling()
 
