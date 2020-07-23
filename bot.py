@@ -1,7 +1,7 @@
 import telebot
 from telebot import types
 from collections import defaultdict
-import sqlite3
+import requests
 
 token = '1098632551:AAFWxP9r6bQ4HTfZ54Rcau3kBAC0qMOcS00'
 bot = telebot.TeleBot(token)
@@ -14,6 +14,27 @@ USER_STATE = defaultdict(lambda: START)
 PLACE = defaultdict(lambda: {})
 USER_PPLACE = defaultdict(lambda: {})
 
+
+def google(origins, destinations=None):
+    url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+    params = {'key': 'AIzaSyCMQMdjMGQUkqwbuFHb7axE2mVh_rTWDGU',
+              'units': 'metric',
+              'language': 'ru',
+              'origins': '50.474455,30.511866',
+              'destinations': '50.474455,30.511866',
+              }
+    if destinations:
+        params['origins'] = origins
+        params['destinations'] = destinations
+    else:
+        params['origins'] = origins
+        params['destinations'] = origins
+
+    r = requests.get(url, params = params)
+    q = r.json()
+    distance = q['rows'][0]['elements'][0]['distance']
+    addres = q['origin_addresses'][0]
+    return addres, distance
 
 def set_user_place(chat_id, title, lok, photo):
     USER_PPLACE[chat_id][title] = [lok, photo]
@@ -47,6 +68,19 @@ def create_keyboard():
     keyboard.add(*button)
     return keyboard
 
+
+@bot.callback_query_handler(func = lambda x: True)
+def callback_handler(callback_query):
+    mess = callback_query.message
+    text = callback_query.data
+    if text == '/add':
+        handle_message_add(mess)
+    elif text == '/list':
+        handle_message_list(mess)
+    elif text == '/reset':
+        handle_message_reset(mess)
+
+
 def check_add(message):
     if message.text:
         for c in add_plase:
@@ -75,7 +109,7 @@ def check_reset(message):
 
 @bot.message_handler(commands = ['list'])
 @bot.message_handler(func = check_list)
-def handle_message(message):
+def handle_message_list(message):
     print(message.text)
     chat_id = message.chat.id
     list_chat = USER_PPLACE[chat_id]
@@ -95,7 +129,7 @@ def handle_message(message):
 
 @bot.message_handler(commands = ['reset'])
 @bot.message_handler(func = check_reset)
-def handle_message(message):
+def handle_message_reset(message):
     print(message.text)
     chat_id = message.chat.id
     reset(chat_id)
@@ -103,21 +137,15 @@ def handle_message(message):
 
 @bot.message_handler(commands = ['add'])
 @bot.message_handler(func = check_add)
-def handle_message(message):
+def handle_message_add(message):
     print(message.text)
     set_state(message, TITLE)
     bot.send_message(chat_id = message.chat.id, text = "Добавление места в память. Название места!")
 
-@bot.message_handler(func = lambda message: get_state(message) == TITLE)
-def handle_message(message):
-    print(message.text)
-    update_lok(message.chat.id, 'title', message.text)
-    bot.send_message(chat_id = message.chat.id,
-                     text = "Добавление места в память. Загрузи локацию!")
-    set_state(message, LOCKEYSHN)
+
 
 @bot.message_handler(func = lambda message: get_state(message) == START)
-def handle_message(message):
+def handle_message_start(message):
     print(message.text)
     keyboard = create_keyboard()
     bot.send_message(chat_id = message.chat.id,
@@ -125,19 +153,36 @@ def handle_message(message):
                      reply_markup =keyboard)
 
 
-@bot.callback_query_handler(func = lambda x: True)
-def callback_handler(callback_query):
-    mess = callback_query.message
-    text = callback_query.data
-    print(mess.chat.id)
-    print(text)
-    text = 'введи: ' + str(text)
-    bot.send_message(mess.chat.id, text = text)
+@bot.message_handler(func = lambda message: get_state(message) == TITLE)
+def handle_message_title(message):
+    print(message.text)
+    update_lok(message.chat.id, 'title', message.text)
+    bot.send_message(chat_id = message.chat.id,
+                     text = "Добавление места в память. Загрузи локацию!")
+    set_state(message, LOCKEYSHN)
+
+
+@bot.message_handler(func = lambda message: get_state(message) == LOCKEYSHN,
+                     content_types = 'location')
+def handle_message_lok(message):
+    lat = message.location.latitude
+    lon = message.location.longitude
+    coord = str(lat) + ',' + str(lon)
+    update_lok(message.chat.id, 'lok', coord)
+    text, dist = google(coord)
+    bot.send_message(chat_id = message.chat.id,
+                     text = text)
+    bot.send_message(chat_id = message.chat.id,
+                     text = "Добавление места в память. Загрузи фото!")
+    set_state(message, PICTCHE)
+
+
+
 
 
 @bot.message_handler(func = lambda message: get_state(message) == PICTCHE,
                      content_types=['photo'])
-def handle_docs_photo(message):
+def handle_message_photo(message):
     try:
         file_info = bot.get_file(message.photo[len(message.photo)-1].file_id)
         downloaded_file = bot.download_file(file_info.file_path)
@@ -159,17 +204,10 @@ def handle_docs_photo(message):
     set_state(message, CONFIRM)
 
 
-@bot.message_handler(func = lambda message: get_state(message) == LOCKEYSHN,
-                     content_types = 'location')
-def handle_message(message):
-    print(message.location)
-    update_lok(message.chat.id, 'lok', message.location)
-    bot.send_message(chat_id = message.chat.id,
-                     text = "Добавление места в память. Загрузи фото!")
-    set_state(message, PICTCHE)
+
 
 @bot.message_handler(func = lambda message: get_state(message) == CONFIRM)
-def handle_message(message):
+def handle_message_confirm(message):
     print(message.location)
     if "da" in message.text.lower():
         bot.send_message(chat_id = message.chat.id,
