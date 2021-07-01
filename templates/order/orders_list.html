@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section class="py-5">
+        <div class="container">
+
+            <div class="col-12 text-center">
+                <h2 class="font-weight-light">Orders list</h2>
+            </div>
+
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Created at</th>
+                    <th scope="col">End at</th>
+                    <th scope="col">Plated end at</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Book</th>
+                    <th scope="col">X</th>
+                    <th scope="col">E</th>
+                    <th scope="col">R</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ order.created_at|date:"d.m.Y H:i:s" }}</td>
+                        <td>{{ order.end_at|date:"d.m.Y" }}</td>
+                        <td>{{ order.plated_end_at|date:"d.m.Y" }}</td>
+                        <td>{{ order.user.first_name }} {{ order.user.last_name }} ({{ order.user.id }})</td>
+                        <td>{{ order.book.name }} ({{ order.book.id }})</td>
+                        <td><a href="./delete/{{ order.id }}">Delete</a></td>
+                        <td><a href="./edit/{{ order.id }}">Edit</a></td>
+                        {% if not order.end_at %}
+                        <td><a href="./return/{{ order.id }}">Return</a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+            <h2 class="font-weight-light"><a href="{% url 'create_order' %}">Create order</a></h2>
+        <div class="col-12 text-center">
+
+            {% if is_all %}
+                <h2 class="font-weight-light"><a href="{% url 'not_returned' %}">Not returned</a></h2>
+            {% else %}
+                <h2 class="font-weight-light"><a href="{% url 'orders_list' %}">All</a></h2>
+            {% endif %}
+        </div>
+
+        </div>
+    </section>
+
+{% endblock %}

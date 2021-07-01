@@ -1,0 +1,12 @@
+{% extends "author/base.html" %}
+{% block content %}
+    {% include 'authentication/includes/nav.html' %}
+    {% include 'authentication/includes/header.html' %}
+    <h3>Create Author</h3>
+</form>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+{% endblock %}

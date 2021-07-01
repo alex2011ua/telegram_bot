@@ -1,1 +1,1 @@
-worker: python bot.py
+web: gunicorn library.wsgi --log-file -

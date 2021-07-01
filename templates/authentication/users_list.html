@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+
+        <div class="col-12 text-center">
+            <h2 class="font-weight-light">Users list</h2>
+        </div>
+
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">First_name</th>
+                    <th scope="col">Middle_name</th>
+                    <th scope="col">Last_name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Last edit</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">IsActive</th>
+                    <th scope="col">X</th>
+                    <th scope="col">E</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.middle_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.created_at|date:"d.m.Y H:i:s" }}</td>
+                    <td>{{ user.updated_at|date:"d.m.Y H:i:s" }}</td>
+                    {% if user.role %}
+                    <td>admin</td>
+                    {% else %}
+                    <td>visitor</td>
+                    {% endif %}
+                    <td>{{ user.is_active }}</td>
+                    <td><a href="./delete/{{ user.id }}">Delete</a></td>
+                    <td><a href="./edit/{{ user.id }}">Edit</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+        <h2 class="font-weight-light"><a href="{% url 'create_user' %}">Create user</a></h2>
+
+
+    </div>
+</section>
+
+{% endblock %}

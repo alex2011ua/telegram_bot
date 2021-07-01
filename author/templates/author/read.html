@@ -1,0 +1,35 @@
+{% extends "author/base.html" %}
+{% block content %}
+    {% include 'authentication/includes/nav.html' %}
+    {% include 'authentication/includes/header.html' %}
+    <div class="jumbotron">
+  <h1 class="display-4">Author</h1>
+  <p class="lead">Python Django project for implementing CRUD</p>
+  <hr class="my-4">
+  <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Surname</th>
+      <th scope="col">Patronymic</th>
+        <th scope="col">Del</th>
+        <th scope="col">Edit</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for author in authors %}
+    <tr>
+        <td>{{ author.id }}</td>
+        <td>{{ author.name }}</td>
+        <td>{{ author.surname }}</td>
+        <td>{{ author.patronymic }}</td>
+    <td><button><a href="delete/{{ author.id }}">Delete</a></button></td>
+    <td><button><a href="update/{{ author.id }}">Edit</a></button></td>
+
+    </tr>
+  {% endfor %}
+  </tbody>
+</table><h2 class="font-weight-light"><a href="{% url 'create_author' %}">Create author</a></h2>
+</div>
+{% endblock %}

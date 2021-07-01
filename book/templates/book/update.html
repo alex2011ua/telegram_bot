@@ -1,0 +1,11 @@
+{% extends "author/base.html" %}
+{% block content %}
+    {% include 'authentication/includes/nav.html' %}
+    {% include 'authentication/includes/header.html' %}
+<h2 class="font-weight-light">Create Book</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Edit</button>
+            </form>
+{% endblock %}
