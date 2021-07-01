@@ -12,7 +12,6 @@ class Author(models.Model):
         type surname: str max_length=20
         param patronymic: Describes middle name of the author
         type patronymic: str max_length=20
-
     """
 
     name = models.CharField(blank=True, max_length=20)

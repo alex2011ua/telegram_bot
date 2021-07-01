@@ -1,9 +1,13 @@
+
 from django.urls import path, include
 from . import views
 
+app_name = 'book'
 urlpatterns = [
-    path("", views.read, name="books_list"),
-    path("create", views.create, name="create_book"),
-    path("delete/<book_id>/", views.delete, name="delete"),
-    path("edit/<book_id>/", views.edit, name="edit")
+
+    path('', views.book_form, name='book_insert'),
+    path('<int:id>/', views.book_form, name='book_update'),
+    path('delete/<int:id>/', views.book_delete, name='book_delete'),
+    path('list/', views.book_list, name='book_list'),
+
 ]

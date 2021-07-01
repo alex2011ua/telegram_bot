@@ -1,61 +1,38 @@
 from django.shortcuts import render, redirect
-from rest_framework import viewsets
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.templatetags.rest_framework import data
 
-from . import models
-from author import models as md
-
-# Create your views here.
-from .forms import BookCreationForm
 from .models import Book
-from .serializers import BookSerializer
+# Create your views here.
+
+def book_list(request):
+    context = {}
+    all_book = Book.get_all()
+    context.update({'all_book': all_book})
+    return render(request, 'book/all_book.html', context)
 
 
-def read(request):
-    books_list = models.Book.objects.all()
-    # book.save()
-    return render(request, 'book/read.html', {"books": books_list})
-
-
-def delete(request, book_id):
-    models.Book.objects.filter(id=book_id).delete()
-    return redirect("/book/")
-
-
-def create(request):
+def book_form(request, id = 0):
     if request.method == 'GET':
-        context = {'form': BookCreationForm()}
-        return render(request, 'book/create.html', context)
+        if id == 0:
+            return render(request, 'book/book_form.html')
+        else:
+            book = Book.get_by_id(id)
+            context = {'book': book}
+            return render(request, 'book/book_form.html', context)
     else:
-        try:
-            form = BookCreationForm(request.POST)
-            new_book = form.save()
-            new_book.save()
-            return redirect('books_list')
-        except ValueError:
-            context = {'form': BookCreationForm(), 'error': 'Invalid Data'}
-            return render(request, 'book/create.html', context)
+        if id == 0:
+            name = (request.POST.get('name'))
+            decsription = (request.POST.get('description'))
+            count = (request.POST.get('count'))
+            b = Book.create(name, decsription, int(count))
+            return redirect('book:book_list')
+        else:
+            name = (request.POST.get('name'))
+            decsription = (request.POST.get('description'))
+            count = (request.POST.get('count'))
+            book = Book.get_by_id(id)
+            book.update(name, decsription, count)
+            return redirect('book:book_list')
 
-
-def edit(request, book_id):
-    book = models.Book.get_by_id(book_id)
-    if request.method == "GET":
-        form = BookCreationForm(instance=book)
-        context = {'form': form}
-        return render(request, 'book/update.html', context)
-    else:
-        form = BookCreationForm(request.POST, instance=book)
-        form.save()
-        return redirect('books_list')
-
-
-class BookView(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-
-    def delete(self, request, pk=None):
-        book = Book.objects.get(id=pk)
-        book.delete()
-        return Response(data(self.serializer_class(book)), 204)
+def book_delete(request, id):
+    Book.delete_by_id(id)
+    return redirect('book:book_list')

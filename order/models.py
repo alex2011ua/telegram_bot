@@ -93,9 +93,3 @@ class Order(models.Model):
             # LOGGER.error("User does not exist")
             pass
         return False
-    
-    
-    def save(self, *args, **kwargs):
-        if self.plated_end_at is None:
-            self.plated_end_at = datetime.datetime.now() + datetime.timedelta(days=15)
-        super(Order, self).save(*args, **kwargs)

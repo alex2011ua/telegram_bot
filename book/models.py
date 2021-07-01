@@ -161,3 +161,6 @@ class Book(models.Model):
         """
         all_users = Book.objects.all()
         return list(all_users)
+
+    def get_id(self):
+        return self.id
